@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: simrec
+message: >
+  If you use this software or the associated schemas in your work,
+  please cite it using the following metadata.
+type: software
+authors:
+  - family-names: Ragasa
+    given-names: Eugene J.
+    orcid: https://orcid.org/0000-0000-0000-0000
+abstract: >
+  simrec is a schema-first framework for representing simulation outputs
+  as structured records and enforcing evidence-tethered analytical claims.
+  It defines formal event and claim schemas intended to support auditable,
+  domain-agnostic post-simulation analysis above the solver layer.
+license: MIT
+repository-code: https://github.com/<your-username>/simrec
+url: https://github.com/<your-username>/simrec
+keywords:
+  - simulation
+  - reproducibility
+  - provenance
+  - scientific-computing
+  - methods
+  - auditability
+
