@@ -14,8 +14,8 @@ abstract: >
   It defines formal event and claim schemas intended to support auditable,
   domain-agnostic post-simulation analysis above the solver layer.
 license: MIT
-repository-code: https://github.com/<your-username>/simrec
-url: https://github.com/<your-username>/simrec
+repository-code: https://github.com/eragasa/simrec
+url: https://github.com/eragasa/simrec
 keywords:
   - simulation
   - reproducibility

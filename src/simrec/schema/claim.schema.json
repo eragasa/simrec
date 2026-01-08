@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/eragasa/simrec/main/schema/claim.schema.json",
+  "title": "simrec.Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["claim_id", "lens", "claim_text", "evidence_refs"],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{6,128}$",
+      "description": "Stable unique identifier for the claim."
+    },
+    "lens": {
+      "type": "string",
+      "enum": ["north", "aamalu", "glaeser"],
+      "description": "Which analytical lens produced the claim."
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000,
+      "description": "Dry analytic statement; no narrative."
+    },
+    "claim_type": {
+      "type": ["string", "null"],
+      "maxLength": 64,
+      "description": "Optional classifier (e.g., property_rights, congestion, monitoring_costs)."
+    },
+    "severity": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Optional ordinal importance (1=low, 5=high)."
+    },
+    "confidence": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional confidence in [0,1]."
+    },
+    "tags": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_:-]{0,63}$"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/evidence_ref" },
+      "description": "Must cite at least one event and one evidence unit."
+    },
+    "counterevidence": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/evidence_ref" }
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 2000
+    }
+  },
+
+  "allOf": [
+    {
+      "description": "Require at least one quote or image evidence ref.",
+      "anyOf": [
+        {
+          "properties": {
+            "evidence_refs": {
+              "contains": {
+                "type": "object",
+                "properties": { "kind": { "const": "quote" } },
+                "required": ["kind"]
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "evidence_refs": {
+              "contains": {
+                "type": "object",
+                "properties": { "kind": { "const": "image" } },
+                "required": ["kind"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "$defs": {
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "kind"],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{6,128}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["quote", "image", "metric", "docref"],
+          "description": "Type of evidence tied to the event."
+        },
+        "doc_id": {
+          "type": ["string", "null"],
+          "maxLength": 200
+        },
+        "start": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "end": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "filename": {
+          "type": ["string", "null"],
+          "maxLength": 300
+        },
+        "key": {
+          "type": ["string", "null"],
+          "maxLength": 200,
+          "description": "For metric evidence (e.g., 'population', 'prepared_meals')."
+        },
+        "value": {
+          "type": ["number", "integer", "string", "boolean", "null"],
+          "description": "Optional metric value snapshot."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "quote" } }, "required": ["kind"] },
+          "then": { "required": ["doc_id"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "image" } }, "required": ["kind"] },
+          "then": { "required": ["doc_id", "filename"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "metric" } }, "required": ["kind"] },
+          "then": { "required": ["key"] }
+        }
+      ]
+    }
+  }
+}

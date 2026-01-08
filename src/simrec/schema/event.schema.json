@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/eragasa/simrec/main/schema/event.schema.json",
+  "title": "simrec.Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "log_id", "timestamp_text", "event_type", "summary", "evidence"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{6,128}$",
+      "description": "Stable unique identifier for the event."
+    },
+    "log_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,64}$",
+      "description": "Logical grouping (e.g., Log 5, Segment 1052-hematite)."
+    },
+    "timestamp_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Original timestamp string as found in the record."
+    },
+    "timestamp_iso": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Optional normalized timestamp. Null if not resolvable."
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Open enum. Domain adapters should map to a controlled vocabulary if desired."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Non-interpretive description of what occurred."
+    },
+    "actors": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/actor" },
+      "description": "Agents involved, if identified."
+    },
+    "objects": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/object" },
+      "description": "Items/infrastructure/commodities involved, if identified."
+    },
+    "location": {
+      "$ref": "#/$defs/location"
+    },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": ["number", "integer", "string", "boolean", "null"] },
+      "description": "Optional numeric/typed measurements (population, stock levels, etc.)."
+    },
+    "tags": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_:-]{0,63}$"
+      },
+      "description": "Lightweight classifier tags; lowercase snake/slug style."
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence_bundle"
+    }
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "role": { "type": ["string", "null"], "maxLength": 200 },
+        "kind": {
+          "type": ["string", "null"],
+          "maxLength": 64,
+          "description": "Optional coarse type (person, group, animal, institution)."
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "integer", "boolean", "null"] }
+        }
+      }
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "category": { "type": ["string", "null"], "maxLength": 64 },
+        "quantity": { "type": ["number", "integer", "null"], "minimum": 0 },
+        "unit": { "type": ["string", "null"], "maxLength": 32 },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "integer", "boolean", "null"] }
+        }
+      }
+    },
+    "location": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "maxLength": 200 },
+        "zone": { "type": ["string", "null"], "maxLength": 200 },
+        "coords": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "x": { "type": ["integer", "null"] },
+            "y": { "type": ["integer", "null"] },
+            "z": { "type": ["integer", "null"] }
+          }
+        }
+      }
+    },
+    "evidence_bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quotes", "images", "refs"],
+      "properties": {
+        "quotes": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/$defs/quote_span" },
+          "description": "Exact or near-exact spans from source text."
+        },
+        "images": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/$defs/image_ref" },
+          "description": "References to images; captions must be descriptive, not interpretive."
+        },
+        "refs": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/$defs/ref" },
+          "description": "Generic citations (doc ids, URLs, hashes)."
+        }
+      },
+      "allOf": [
+        {
+          "description": "Require at least one evidence channel to be non-empty.",
+          "anyOf": [
+            { "properties": { "quotes": { "minItems": 1 } } },
+            { "properties": { "images": { "minItems": 1 } } },
+            { "properties": { "refs": { "minItems": 1 } } }
+          ]
+        }
+      ]
+    },
+    "quote_span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["doc_id", "text"],
+      "properties": {
+        "doc_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "start": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Optional char offset in doc text."
+        },
+        "end": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Optional char offset in doc text."
+        },
+        "text": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      },
+      "allOf": [
+        {
+          "description": "If start is provided as an integer, end must also be provided as an integer.",
+          "if": {
+            "properties": { "start": { "type": "integer" } },
+            "required": ["start"]
+          },
+          "then": {
+            "required": ["end"],
+            "properties": { "end": { "type": "integer", "minimum": 0 } }
+          }
+        },
+        {
+          "description": "If end is provided as an integer, start must also be provided as an integer.",
+          "if": {
+            "properties": { "end": { "type": "integer" } },
+            "required": ["end"]
+          },
+          "then": {
+            "required": ["start"],
+            "properties": { "start": { "type": "integer", "minimum": 0 } }
+          }
+        }
+      ]
+    },
+    "image_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["doc_id", "filename"],
+      "properties": {
+        "doc_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "filename": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "caption": {
+          "type": ["string", "null"],
+          "maxLength": 2000,
+          "description": "Descriptive caption. Avoid causal claims."
+        },
+        "slot": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]$",
+          "description": "Optional A–Z image slot label."
+        }
+      }
+    },
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["doc", "url", "hash", "other"]
+        },
+        "value": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    }
+  }
+}
+

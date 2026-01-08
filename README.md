@@ -93,3 +93,18 @@ However, it differs in its explicit enforcement of evidence-tethered claims and 
 ---
 ## License
 MIT License.
+---
+## Citation
+If you use this software or the associated schemas in your work, please cite:
+
+`Ragasa, E. J. (2026). *simrec: Schema-first simulation records and evidence-tethered analysis*. GitHub repository. https://github.com/<your-username>/simrec`
+
+```bibtex
+@software{ragasa_simrec_2026,
+  author  = {Ragasa, Eugene J.},
+  title   = {simrec: Schema-first simulation records and evidence-tethered analysis},
+  year    = {2026},
+  url     = {https://github.com/<your-username>/simrec},
+  note    = {Versioned releases available via the repository}
+}
+```
