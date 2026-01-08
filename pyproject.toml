@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simrec"
+version = "0.0.1"
+description = "Schema-validated simulation record extraction and tethered analysis."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Eugene J. Ragasa"}]
+dependencies = [
+  "jsonschema>=4.22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.5.0",
+  "mypy>=1.10.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+simrec = ["schema/*.json", "py.typed"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
